@@ -53,6 +53,12 @@ export default class XrpsController {
                 await wall.save();
             }
 
+            const desWall = await WalletModel.findBy('address', payload.destination_address);
+            if(desWall){
+                desWall.balance = String(parseFloat(desWall.balance) + parseFloat(payload.amount));
+                await desWall.save();
+            }
+
             const log = await Log.create({
                 accountId: wall?.id,
                 destination: payload.destination_address,
@@ -99,6 +105,15 @@ export default class XrpsController {
                 account: wallet.address,
                 ledger_index: 'validated'
             });
+
+            const prevWallet = await WalletModel.findBy('address', wallet.address);
+
+            if(prevWallet){
+                return response.unprocessableEntity({
+                    success: false,
+                    message: "Wallet already exists!"
+                });
+            }
 
             const storedWallet = await WalletModel.create({
                 title: payload.title,
