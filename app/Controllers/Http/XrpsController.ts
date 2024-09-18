@@ -47,17 +47,6 @@ export default class XrpsController {
             const tx = await this.client.submit(signed.tx_blob);
 
             const wall = await WalletModel.findBy('address', payload.account_address);
-            
-            if(wall){
-                wall.balance = String(parseFloat(wall.balance) - (parseFloat(payload.amount) + parseFloat(dropsToXrp(tx.result.tx_json.Fee))))
-                await wall.save();
-            }
-
-            const desWall = await WalletModel.findBy('address', payload.destination_address);
-            if(desWall){
-                desWall.balance = String(parseFloat(desWall.balance) + parseFloat(payload.amount));
-                await desWall.save();
-            }
 
             const log = await Log.create({
                 accountId: wall?.id,
@@ -80,6 +69,38 @@ export default class XrpsController {
 
         } catch (e){
             return response.badRequest({
+                success: false,
+                message: e.message
+            });
+        }
+    }
+
+    async getBalance({ request, response }: HttpContextContract){
+        try {
+            await this.client.connect();
+
+            const wallet = await WalletModel.find(request.param('id'));
+
+            if(!wallet){
+                return response.notFound({
+                    success: false,
+                    message: "Wallet not found"
+                });
+            }
+
+            const account_info = await this.client.request({
+                command: 'account_info',
+                account: wallet.address,
+                ledger_index: 'validated',
+            });
+
+            return response.ok({
+                success: true,
+                message: 'Data Found!',
+                balance: dropsToXrp(account_info.result.account_data.Balance)
+            });
+        } catch (e) {
+            return response.unprocessableEntity({
                 success: false,
                 message: e.message
             });
@@ -121,7 +142,6 @@ export default class XrpsController {
                 privateKey: wallet.privateKey,
                 address: wallet.address,
                 seed: wallet.seed,
-                balance: String(dropsToXrp(info.result.account_data.Balance)),
                 ledgerIndex: info.result.ledger_index,
                 ledgerHash: info.result.ledger_hash
             });

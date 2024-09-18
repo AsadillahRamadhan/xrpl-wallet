@@ -24,3 +24,4 @@ Route.get('/get-accounts', 'XrpsController.getAccounts');
 Route.post('/send-xrp', 'XrpsController.sendXrp');
 Route.post('/get-account', 'XrpsController.getAccount');
 Route.get('/get-logs/:id', 'XrpsController.getLogs');
+Route.get('/get-balance/:id', 'XrpsController.getBalance');

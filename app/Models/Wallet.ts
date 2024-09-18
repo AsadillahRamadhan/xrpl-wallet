@@ -21,9 +21,6 @@ export default class Wallet extends BaseModel {
   public seed: string
 
   @column()
-  public balance: string
-
-  @column()
   public ledgerIndex: number
 
   @column()

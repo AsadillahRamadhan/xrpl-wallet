@@ -11,7 +11,6 @@ export default class extends BaseSchema {
       table.string('private_key')
       table.string('address')
       table.string('seed')
-      table.string('balance')
       table.bigInteger('ledger_index')
       table.string('ledger_hash')
       table.timestamp('created_at', { useTz: true })
